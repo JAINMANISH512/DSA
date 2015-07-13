@@ -226,7 +226,173 @@ def isbalanced(root):
         return True
     else:
         return False
+
+
+def inorditer(root):
+    stack=[]
+    curr=root
+    done=False
+    while not done:
+        if curr:
+            stack.append(curr)
+            curr=curr.left
+        else:
+            if not len(stack) == 0:
+                curr=stack.pop()
+                print curr.data
+                curr=curr.right
+            else:
+                done=True    
+
+def roottoleafsum(root,sum):
+    if root==None:
+        return sum==0
+    sum=sum-root.data    
+    if sum==0 and root.left==None and root.right== None:
+        return True
+    ans=False
     
+    ans=roottoleafsum(root.left,sum) or roottoleafsum(root.right,sum)    
+    return ans
+
+preidx=0
+def buildtree(ino,pre,str,end):
+    global preidx
+    print ino,pre,str,end,preidx
+    if(str>end):
+        return None
+    new=Node(pre[preidx])
+    print new.data
+    preidx+=1
+    if(str==end):
+        return new
+    inidx=search(ino,str,end,new.data)
+    new.left=buildtree(ino,pre,str,inidx-1)
+    new.right=buildtree(ino,pre,inidx+1,end)
+    return new
+
+def search(arr,str,end,val):
+    i=str
+    while i<=end:
+        if arr[i]==val:
+            print i
+            return i
+        i+=1
+def printpaths(root):
+    path=[None]*1000
+    printpathutil(root,path,0)
+
+def printpathutil(root,path,pathlen):
+    if root==None:
+        return
+    path[pathlen]=root.data
+    pathlen+=1
+    if root.left==None and root.right==None:
+        print path[:pathlen]
+    else:
+        printpathutil(root.left,path,pathlen)
+        printpathutil(root.right,path,pathlen)
+
+def doubletree(root):
+    if root==None:
+        return
+    doubletree(root.left)
+    doubletree(root.right)
+    oldleft=root.left
+    newleft=Node(root.data)
+    root.left=newleft
+    newleft.left=oldleft
+
+def maxwidth(root):
+    maxwidth=0
+    for i in range(height(root)):
+        width=treewidth(root,i+1)
+        if width>maxwidth:
+            maxwidth=width
+    return maxwidth    
+
+def treewidth(root,lev):
+    if root==None:
+        return 0
+    if lev==1:
+        return 1
+    elif lev>1:
+        return treewidth(root.left,lev-1)+treewidth(root.right,lev-1)
+def isstructsame(root1,root2):
+    if root1==None and root2==None:
+        return True
+    if root1 and root2 and isstructsame(root1.left,root2.left) and isstructsame(root1.right,root2.right):
+        return True
+    else:
+        return False
+
+def isfoldable(root):
+    if root==None:
+        return True
+    convertmirror(root.left)
+    res=isstructsame(root.left,root.right)
+    convertmirror(root.left)
+    return res
+
+def printkdist(root,k):
+    if root==None:
+        return
+    if k==0:
+        print root.data
+    else:
+        printkdist(root.left,k-1)
+        printkdist(root.right,k-1)
+
+def getlevel(root,val,lev):
+    if root==None:
+        return 0
+    if root.data==val:
+        return lev
+    res=getlevel(root.left,val,lev+1)
+    if not res==0:
+        return res
+    else:
+        return getlevel(root.right,val,lev+1)
+
+def printances(root,tar):
+    if root==None:
+        return False
+    if root.data==tar:
+        return True
+
+    if printances(root.left,tar) or printances(root.right,tar):
+        print root.data
+        return True    
+
+def sumtree(root):
+    if root==None:
+        return 0
+    else:
+        return root.data+sumtree(root.left)+sumtree(root.right)
+
+def issumtree(root):
+    if root==None:
+        return True
+    if root.left==None and root.right==None:
+        return True
+    ls=sumtree(root.left)
+    rs=sumtree(root.right)
+
+    if root.data==ls+rs and issumtree(root.left) and issumtree(root.right):
+        return True
+    return False
+
+def issubtree(root1,root2):
+    if root2==None:
+        return True
+    if root1==None:
+        return False
+    if isidentical(root1,root2):
+        return True
+    return issubtree(root1.left,root2) or issubtree(root1.right,root2)
+
+ def connect(root):
+    pass
 mytree=Tree()
 mytree.root=Node(1)
 mytree.root.left=Node(2)
@@ -253,6 +419,18 @@ mytree4.root.left=Node(9)
 mytree4.root.right=Node(3)
 mytree4.root.left.left=Node(4)
 mytree4.root.left.right=Node(5)
+
+mytree5=Tree()
+mytree5.root=Node(26)
+mytree5.root.left=Node(9)
+mytree5.root.right=Node(8)
+mytree5.root.left.left=Node(4)
+mytree5.root.left.right=Node(5)
+
+mytree6=Tree()
+mytree6.root=Node(2)
+mytree6.root.left=Node(4)
+mytree6.root.right=Node(5)
 
 #print mytree.root,mytree.root.left,mytree.root.right,mytree.root.left.left
 
@@ -300,4 +478,39 @@ mytree4.root.left.right=Node(5)
 
 #print diameter(mytree.root)
 
-print isbalanced(mytree4.root)
+#print isbalanced(mytree4.root)
+
+#inorditer(mytree.root)
+
+#print roottoleafsum(mytree.root,3)
+
+#ino=['D', 'B', 'E', 'A', 'F', 'C']
+#pre=['A', 'B', 'D', 'E', 'C', 'F']
+#length=len(pre)
+#root = buildtree(ino,pre,0,length-1)
+#inorder(root)
+
+#printpaths(mytree.root)
+
+#doubletree(mytree.root)
+#inorder(mytree.root)
+
+#print maxwidth(mytree.root)
+
+#print isfoldable(mytree4.root)
+
+#printkdist(mytree.root,0)
+#printkdist(mytree.root,1)
+#printkdist(mytree.root,2)
+#printkdist(mytree.root,3)
+
+#print getlevel(mytree.root,5,1)
+
+#printances(mytree.root,5)
+
+#print issumtree(mytree5.root)
+
+#print issubtree(mytree.root,mytree2.root)
+#print issubtree(mytree2.root,mytree6.root)
+
+#connect(mytree.root)
