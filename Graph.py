@@ -8,8 +8,9 @@ class adjnode(object):
         return str(self.dest)
 
 class adjlist(object):
-    def __init__(self,head=None):
+    def __init__(self,head=None,tail=None):
         self.head=head
+        self.tail=tail
     
     def __str__(self):
         current=self.head
@@ -28,85 +29,107 @@ class graph(object):
 
     def __str__(self):
         return str(self.array)
+class queue(object):
+    def __init__(self,front=None,back=None):
+		self.front=None
+		self.back=None
+    def __str__(self):
+        current=self.front
+        a=[]
+        while current:
+            a.append(current.dest)
+            current=current.next
+        return str(a)
+    def isemp(self):
+        return self.front==None
+    def enq(self,data):
+    	new=adjnode(data)
+    	if self.front==None:
+    		self.front=self.tail=new
+    	else:
+    		self.tail.next=new
+    		self.tail=new
+    def deq(self):
+    	if not self.isemp():
+    		temp=self.front
+    		data=temp.dest
+    		self.front=self.front.next
+    		del temp
 
+    		return data
+    	else :
+    		return -1
+    def frontele(self):
+    	if self.isemp():
+    		return self.front.dest
+    	else:
+    		return -1
 def printgraph(g):
     for src in range(g.v):
-        print str(src)+ "->"+str(g.array[src]) 
+        print str(src)+ "->"+str(g.array[src])
         
 
-def adduedgeatstart(g,src,dest):
-    new=adjnode(dest,g.array[src].head)
-    g.array[src].head=new
- 
-    
-    new=adjnode(src,g.array[dest].head)
-    g.array[dest].head=new
-
-def addedgeatstart(g,src,dest):
-    new=adjnode(dest,g.array[src].head)
-    g.array[src].head=new
-
-def adduedge(g,src,dest):
-    addedge(g,src,dest)
-    addedge(g,dest,src)
-
 def addedge(g,src,dest):
-    new=adjnode(dest)
-    crawl=g.array[src].head
-    if crawl:
-    	while crawl.next:
-    		crawl=crawl.next
-    	crawl.next=new
-    else:
-    	g.array[src].head=new
+	#print str(src)+"->"+str(dest)+"added"
+	new=adjnode(dest,g.array[src].head)
+	g.array[src].head=new
+	return g
+def adduedge(g,src,dest):
+	addedge(g,src,dest)
+	addedge(g,dest,src)
+	return g
+def addedgeend(g,src,dest):
+	#print str(src)+"->"+str(dest)+" added"
+	new=adjnode(dest)
+	if g.array[src].tail==None:
+		g.array[src].head=g.array[src].tail=new
+	else:
+		g.array[src].tail.next=new
+		g.array[src].tail=new
+	return g
+
+def adduedgeend(g,src,dest):
+	addedgeend(g,src,dest)
+	addedgeend(g,dest,src)
+	return g
 
 def bfs(g,src):
-	print "Bfs"
-	visited=[]
-	for i in range(g.v):
-		visited.append(False)
-	
- 	visited[src]=True
- 	
-	queue=deque([])
- 	queue.append(src)
-
- 	while not len(queue) == 0:
- 		s=queue.popleft()
- 		print s
- 		crawl=g.array[s].head
- 		while crawl:
- 			if not visited[crawl.dest]:
- 				queue.append(crawl.dest)
- 				visited[crawl.dest]=True
- 			crawl=crawl.next	
-
-def dfs(g,src):
-	print "Dfs"
-	visited=[]
-	for i in range(g.v):
-		visited.append(False)
-	dfsutil(g,src,visited)
-
-def dfsutil(g,src,visited):	
- 	visited[src]=True
- 	print src
- 	
-	crawl=g.array[src].head
- 	while crawl:
- 		if not visited[crawl.dest]:
- 			visited[crawl.dest]=True
- 			dfsutil(g,crawl.dest,visited)
- 		crawl=crawl.next			
+    visited=[]
+    for i in range(g.v):
+        visited.append(False)
+    visited[src]=True
+    myqueue=queue()
+    myqueue.enq(src)
+    while myqueue.isemp()==False:
+        
+        s=myqueue.deq()
+        print s,
+        curr=g.array[s].head
+        while curr:
+            if visited[curr.dest]==False:
+                myqueue.enq(curr.dest)
+                visited[curr.dest]=True
+            curr=curr.next   
 
 
-mygraph=graph(4)
-addedge(mygraph,0,1)
-addedge(mygraph,0,2)
-addedge(mygraph,1,2)
-addedge(mygraph,2,0)
-addedge(mygraph,2,3)
-addedge(mygraph,3,3)
+mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=adduedge(mygraph,0,1)
+#mygraph=adduedge(mygraph,0,4)
+#mygraph=adduedge(mygraph,1,2)
+#mygraph=adduedge(mygraph,1,3)
+#mygraph=adduedge(mygraph,1,4)
+#mygraph=adduedge(mygraph,2,3)
+#mygraph=adduedge(mygraph,3,4)
+#printgraph(mygraph)
 
+mygraph=adduedgeend(mygraph,0,1)
+mygraph=adduedgeend(mygraph,0,4)
+mygraph=adduedgeend(mygraph,1,2)
+mygraph=adduedgeend(mygraph,1,3)
+mygraph=adduedgeend(mygraph,1,4)
+mygraph=adduedgeend(mygraph,2,3)
+mygraph=adduedgeend(mygraph,3,4)
 printgraph(mygraph)
-dfs(mygraph,2)
+
+bfs(mygraph,2)
