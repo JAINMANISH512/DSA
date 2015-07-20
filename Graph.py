@@ -46,6 +46,15 @@ class newgraph(object):
         self.edgelist=[]
         for i in range(self.e):
             self.edgelist.append(edge(None,None,None))
+    def __str__(self):
+    	res=[]
+    	for i in range(self.e):
+    		b=[]
+    		b.append(self.edgelist[i].src)
+    		b.append(self.edgelist[i].weight)
+    		b.append(self.edgelist[i].dest)
+    		res.append(b)
+    	return str(res)
     def sortedges(self):
         for i in range(self.e-1):
             for j in range(i+1,self.e):
@@ -451,8 +460,172 @@ def kruskal(g):
     for i in range(g.v-1):
         print result[i]
 
-    
+def minkey(key,mstset):
+	minx=float("inf")
+	minidx=-1
+	for i in range(len(key)):
+		if mstset[i]==False and key[i]<minx:
+			minx=key[i]
+			minidx=i
+	return minidx   
+def primadjmat(g):
+	V=len(g)
+	parent=[]
+	mstset=[]
+	key=[]
 
+	for i in range(V):
+		parent.append(None)
+		key.append(float("inf"))
+		mstset.append(False)
+
+	key[0]=0
+	parent[0]=-1
+	for i in range(V-1):
+		u=minkey(key,mstset)
+		mstset[u]=True
+		for v in range(V):
+			if g[u][v] and mstset[v]==False and g[u][v]<key[v]:
+				parent[v]=u
+				key[v]=g[u][v]
+
+	for i in range(1,V):
+		print str(parent[i])+"----" +str(i)+"-==--"+str(g[parent[i]][i]) 
+  
+def borgukal(g):
+	V=g.v
+	E=g.e
+	parent=[]
+	cheapest=[]
+	for i in range(V):
+		parent.append(-1)
+		cheapest.append(-1)
+	numTrees=V
+	while numTrees>1:
+		for i in range(E):
+			set1=find(parent,g.edgelist[i].src)
+			set2=find(parent,g.edgelist[i].dest)
+
+			if set1==set2:
+				continue
+
+			if cheapest[set1]==-1 or g.edgelist[cheapest[set1]].weight>g.edgelist[i].weight:
+				cheapest[set1]=i
+			if cheapest[set2]==-1 or g.edgelist[cheapest[set2]].weight>g.edgelist[i].weight:
+				cheapest[set2]=i
+
+		for i in range(V):
+			if not cheapest[i]==-1:
+				set1=find(parent,g.edgelist[cheapest[i]].src)
+				set2=find(parent,g.edgelist[cheapest[i]].dest)
+				if set1==set2:
+					continue
+				print str(g.edgelist[cheapest[i]].src)+"---"+str(g.edgelist[cheapest[i]].weight)+"---"+str(g.edgelist[cheapest[i]].dest)
+				union(parent,set1,set2)
+				numTrees-=1
+
+def dijkstra(g,src,V):
+	mstset=[]
+	dist=[]
+
+	for i in range(V):
+		dist.append(float("inf"))
+		mstset.append(False)
+
+	dist[src]=0
+	for i in range(V-1):
+		u=minkey(dist,mstset)
+		mstset[u]=True
+		for v in range(V):
+			if g[u][v] and mstset[v]==False and not (dist[u]==float("inf")) and dist[u]+g[u][v]<dist[v]:
+				dist[v]=g[u][v]+dist[u]
+
+	for i in range(0,V):
+		print str(i)+"-==--"+str(dist[i]) 	
+
+def bellmanford(g,src):
+	V=g.v
+	E=g.e
+	dist=[]
+	for i in range(V):
+		dist.append(float("inf"))
+	dist[src]=0
+	for i in range(V-1):
+		for j in range(E):
+			u=g.edgelist[j].src
+			v=g.edgelist[j].dest
+			if not (dist[u]==float("inf")) and dist[u]+g.edgelist[j].weight<dist[v]:
+				dist[v]=dist[u]+g.edgelist[j].weight
+	for j in range(E):
+			u=g.edgelist[j].src
+			v=g.edgelist[j].dest
+			if not (dist[u]==float("inf")) and dist[u]+g.edgelist[j].weight<dist[v]:
+				print "Negative Cycle!!!!!!"
+				break
+	for i in range(0,V):
+		print str(i)+"-==--"+str(dist[i]) 
+
+
+def floydwarshall(g):
+	V=len(g)
+	dist=[]
+	for i in range(V):
+		b=[]
+		for j in range(V):
+			b.append(g[i][j])
+		dist.append(b)
+	for k in range(V):
+		for i in range(V):
+			for j in range(V):
+				if dist[i][k]+dist[k][j]<dist[i][j] and not (dist[i][k] == float("inf")) and  not (dist[k][j] == float("inf")):
+					dist[i][j]=dist[i][k]+dist[k][j]
+
+	print dist
+
+def shortestpathklen(g,u,v,k):
+	if k==0 and u==v:
+		return 0
+	if k==1 and not (g[u][v]==float("inf")):
+		return g[u][v]
+	if k<0:
+		return float("inf")
+	res=float("inf")
+
+	for i in range(len(g)):
+		if not (g[u][i]==float("inf")) and not(u==i) and not(v==i):
+			res1=shortestpathklen(g,i,v,k-1)
+			if not res1==float("inf"):
+				res=min(res,g[u][i]+res1)
+	return res
+
+def transposegraphadjlist(mygraph):
+	newgraph=graph(mygraph.v)
+	for i in range(mygraph.v):
+		curr=mygraph.array[i].head
+		while curr:
+			newgraph =addedgeend(newgraph,curr.dest,i)
+			curr=curr.next
+	return newgraph
+
+
+def isSC(mygraph):
+	visited=[]
+	for i in range(mygraph.v):
+		visited.append(False)
+	visited=dfsutil(0,mygraph,visited)
+	for i in range(mygraph.v):
+		if visited[i]==False:
+			return False
+	mygraphtrans=transposegraphadjlist(mygraph)
+	for i in range(mygraph.v):
+		visited[i]=False
+	print "\n"
+	visited=dfsutil(0,mygraphtrans,visited)
+	print "\n"
+	for i in range(mygraph.v):
+		if visited[i]==False:
+			return False
+	return True
 
 #mygraph=graph(5)
 #printgraph(mygraph)
@@ -616,6 +789,90 @@ mygraph2.edgelist[4].weight=4
 #print mygraph2.edgelist[2]
 
 
-kruskal(mygraph2)
+#kruskal(mygraph2)
 
 #print isundircycle(mygraph2)
+
+
+g=[]
+for i in range(5):
+    b=[]
+    for j in range(5):
+        b.append(0)
+    g.append(b)
+#print g
+g[0][1]=2
+g[0][3]=6
+g[1][0]=2
+g[1][2]=3
+g[1][3]=8
+g[1][4]=5
+g[2][1]=3
+g[2][4]=7
+g[3][0]=6
+g[3][1]=8
+g[3][4]=9
+g[4][1]=5
+g[4][2]=7
+g[4][3]=9
+
+#primadjmat(g)
+
+#borgukal(mygraph2)
+
+#dijkstra(g,0,4)
+
+#print mygraph2
+#bellmanford(mygraph2,0)
+
+#print g
+#floydwarshall(g)
+
+
+g1=[]
+for i in range(4):
+    b=[]
+    for j in range(4):
+        b.append(0)
+    g1.append(b)
+
+g1[0][1]=10
+g1[0][2]=3
+g1[0][3]=2
+g1[1][0]=float("inf")
+g1[1][2]=float("inf")
+g1[1][3]=7
+g1[2][0]=float("inf")
+g1[2][1]=float("inf")
+g1[2][3]=6
+g1[3][0]=float("inf")
+g1[3][1]=float("inf")
+g1[3][2]=float("inf")
+#print g1
+#print shortestpathklen(g1,0,3,2)
+
+
+
+mygraph=graph(5)
+printgraph(mygraph)
+mygraph=addedgeend(mygraph,0,1)
+mygraph=addedgeend(mygraph,1,2)
+mygraph=addedgeend(mygraph,2,3)
+mygraph=addedgeend(mygraph,3,0)
+mygraph=addedgeend(mygraph,2,4)
+mygraph=addedgeend(mygraph,4,2)
+
+printgraph(mygraph)
+print isSC(mygraph)
+
+
+mygraph2=graph(4)
+printgraph(mygraph2)
+mygraph2=addedgeend(mygraph2,0,1)
+mygraph2=addedgeend(mygraph2,1,2)
+mygraph2=addedgeend(mygraph2,2,3)
+
+
+printgraph(mygraph2)
+
+print isSC(mygraph2)
