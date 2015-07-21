@@ -25,8 +25,12 @@ class graph(object):
     def __init__(self,v):
         self.v=v
         self.array=[]
+        self.indeg=[]
+        self.outdeg=[]
         for i in range(v):
             self.array.append(adjlist(None))
+            self.indeg.append(0)
+            self.outdeg.append(0)
 
     def __str__(self):
         return str(self.array)
@@ -115,6 +119,9 @@ def addedge(g,src,dest,weight=0):
 	#print str(src)+"->"+str(dest)+"added"
 	new=adjnode(dest,weight,g.array[src].head)
 	g.array[src].head=new
+	g.indeg[dest]+=1
+	g.outdeg[src]+=1
+
 	return g
 def adduedge(g,src,dest,weight=0):
 	addedge(g,src,dest,weight)
@@ -128,6 +135,8 @@ def addedgeend(g,src,dest,weight=0):
 	else:
 		g.array[src].tail.next=new
 		g.array[src].tail=new
+	g.indeg[dest]+=1
+	g.outdeg[src]+=1
 	return g
 
 def adduedgeend(g,src,dest,weight=0):
@@ -168,7 +177,7 @@ def dfsutil(src,g,visited):
     curr=g.array[src].head
     
     while curr:
-        if not visited[curr.dest]:
+        if not visited[curr.dest]and curr.dest>=0 and not (curr.dest==9999):
             visited=dfsutil(curr.dest,g,visited)
         
         curr=curr.next
@@ -627,6 +636,268 @@ def isSC(mygraph):
 			return False
 	return True
 
+def listsize(head):
+	count=0
+	curr=head
+	while curr:
+		count+=1
+		curr=curr.next
+	return count
+
+def isConnected(mygraph):
+	visited=[]
+	V=mygraph.v
+	for i in range(V):
+		visited.append(False)
+	flag=0
+	for i in range(V):
+		
+		if listsize(mygraph.array[i].head):
+			flag=1
+			break
+	if flag==0:
+		return True
+	visited=dfsutil(i,mygraph,visited)
+	for i in range(V):
+		if not visited[i] and listsize(mygraph.array[i].head)>0:
+			return False
+	return True
+
+def iseuler(mygraph): #0:not 1:path 2:cycle 
+	V=mygraph.v
+	if not isConnected:
+		return 0
+	odd=0
+	for i in range(V):
+		if not  listsize(mygraph.array[i].head)%2==0:
+			odd+=1
+	if odd>2:
+		return 0
+	if odd==0:
+		return 2
+	if odd==2:
+		return 1
+def removeedge(mygraph,u,v): #flag=0  for del
+	
+	curr=mygraph.array[u].head
+	while curr:
+		if curr.dest==v:
+			curr.dest=-1
+			break
+		curr=curr.next
+	
+	curr=mygraph.array[v].head
+	while curr:
+		if curr.dest==u:
+			curr.dest=-1
+			break
+		curr=curr.next
+	
+
+
+	
+def countreachable(mygraph,u):
+	visited=[]
+	for i in range(mygraph.v):
+		visited.append(False)
+	visited=dfsutil(u,mygraph,visited)
+	count=0
+	for i in range(mygraph.v):
+		if visited[i] and not (i==u):
+			count+=1
+	return count
+
+def isvalidedge(mygraph,u,v):
+	count=0
+	curr=mygraph.array[u].head
+	while curr:
+		if curr.dest>=0:
+			count+=1
+		curr=curr.next
+	if count==1:
+		return True
+	count1=countreachable(mygraph,u)
+	removeedge(mygraph,u,v)
+	count2=countreachable(mygraph,u)
+	mygraph=adduedgeend(mygraph,u,v)#add edge
+	if count1>count2:
+		return False
+	return True
+
+	count1=countreachable(mygraph,u)
+def printeuler(mygraph):
+	if not iseuler(mygraph):
+		print "Not euler"
+		return
+	for i in range(mygraph.v):
+		if not (listsize(mygraph.array[i].head)%2==0):
+			break
+	printeulerutil(mygraph,i)
+def printeulerutil(mygraph,u):
+	#print "util"
+	curr=mygraph.array[u].head
+	while curr:
+
+		v=curr.dest
+		#print "checking"+str(u)+"---"+str(v)
+		if not (v<0) and isvalidedge(mygraph,u,v):
+			print str(u)+"---"+str(v)
+			removeedge(mygraph,u,v)
+			
+			printeulerutil(mygraph,v)
+
+		curr=curr.next
+	
+def fill(src,g,visited,stack):
+    visited[src]=True
+    #print src,
+    curr=g.array[src].head
+    
+    while curr:
+        if not visited[curr.dest]:
+        	fill(curr.dest,g,visited,stack)
+            #visited,stack=fill(curr.dest,g,visited,stack)
+        
+        curr=curr.next
+    stack.append(src)
+    #return visited,stack
+
+def printSCC(mygraph):
+	visited=[]
+	stack=[]
+	for i in range(mygraph.v):
+		visited.append(False)
+	for i in range(mygraph.v):
+		if visited[i]==False:
+			#visited,stack=fill(i,mygraph,visited,stack)
+			fill(i,mygraph,visited,stack)
+	new = transposegraphadjlist(mygraph)
+	#printgraph(new)
+	#print stack
+	for i in range(mygraph.v):
+		visited[i]=False
+	while len(stack):
+		v=stack.pop()
+		if visited[v]==False:
+			visited=dfsutil(v,new,visited)
+		print ""
+
+def ireachesj(g):
+	V=len(g)
+	reach=[]
+	for i in range(V):
+		b=[]
+		for j in range(V):
+			b.append(g[i][j])
+		reach.append(b)
+	for k in range(V):
+		for i in range(V):
+			for j in range(V):
+				if reach[i][k]and reach[k][j]:
+					reach[i][j]=1
+
+	print reach
+
+
+def dfsmatrix(g,r,c,visited):
+	visited[r][c]=True
+	for i in range(r-1,r+2):
+		for j in range(c-1,c+2):
+			if i>=0 and i<len(g) and j>=0 and j<len(g) and g[i][j] and (not visited[i][j]):
+				dfsmatrix(g,i,j,visited)
+
+
+def countisland(g):
+	visited=[]
+	for i in range(len(g)):
+		b=[]
+		for j in range(len(g)):
+			b.append(False)
+		visited.append(b)
+	count=0
+	for i in range(len(g)):
+		for j in range(len(g)):
+			if g[i][j] and (not visited[i][j]):
+				dfsmatrix(g,i,j,visited)
+				count+=1
+	return count
+
+def countpathsk(g,u,v,k):
+	if k==0 and u==v:
+		return 1
+	if k==1 and not (g[u][v]==float("inf")):
+		return 1
+	if k<=0:
+		return 0
+	count=0
+
+	for i in range(len(g)):
+		if g[u][i] and not(u==i) and not(v==i):
+			count+=countpathsk(g,i,v,k-1)
+			
+	return count
+
+def isSChelper(mygraph):
+	visited=[]
+	for i in range(mygraph.v):
+		visited.append(False)
+
+	for i in range(mygraph.v):
+		 if mygraph.outdeg[i]>0:
+		 	break
+	k=i
+
+	visited=dfsutil(k,mygraph,visited)
+	for i in range(mygraph.v):
+		if mygraph.outdeg[i]>0 and visited[i]==False:
+			return False
+
+	mygraphtrans=transposegraphadjlist(mygraph)
+	
+	for i in range(mygraph.v):
+		visited[i]=False
+	print "\n"
+	visited=dfsutil(k,mygraphtrans,visited)
+	for i in range(mygraph.v):
+		if mygraph.outdeg[i]>0 and visited[i]==False:
+			return False
+	return True
+
+
+def iseulercycledirec(mygraph):
+	if not isSChelper(mygraph):
+		return False
+	for i in range(mygraph.v):
+		if not mygraph.indeg[i]==mygraph.outdeg[i]:
+			return False
+	return True
+def iscycleundirutil(mygraph,src,visited,parent):
+	visited[src]=True
+	curr=mygraph.array[src].head
+	while curr:
+		if not visited[curr.dest]:
+			if iscycleundirutil(mygraph,curr.dest,visited,src):
+				return True
+		elif not (curr.dest==parent):
+			return True
+		curr=curr.next
+	return False
+
+def isTree(mygraph):
+	visited=[]
+	for i in range(mygraph.v):
+		visited.append(False)
+	print visited
+	if iscycleundirutil(mygraph,0,visited,-1):
+		return False
+	print visited
+	for i in range(mygraph.v):
+		if not visited[i]:
+			return False
+	return True
+
+
+
 #mygraph=graph(5)
 #printgraph(mygraph)
 #mygraph=addedgeend(mygraph,0,1)
@@ -650,6 +921,7 @@ def isSC(mygraph):
 #bfs(mygraph,2)
 #print "\nDFS:"
 #dfs(mygraph)
+
 #print "\nCycle:"
 #dfscycle(mygraph)
 
@@ -767,22 +1039,22 @@ def isSC(mygraph):
 
 #boggle(g,3,3)
 
-mygraph2=newgraph(4,5)
-mygraph2.edgelist[0].src=0
-mygraph2.edgelist[0].dest=1
-mygraph2.edgelist[0].weight=10
-mygraph2.edgelist[1].src=0
-mygraph2.edgelist[1].dest=2
-mygraph2.edgelist[1].weight=6
-mygraph2.edgelist[2].src=0
-mygraph2.edgelist[2].dest=3
-mygraph2.edgelist[2].weight=5
-mygraph2.edgelist[3].src=1
-mygraph2.edgelist[3].dest=3
-mygraph2.edgelist[3].weight=15
-mygraph2.edgelist[4].src=2
-mygraph2.edgelist[4].dest=3
-mygraph2.edgelist[4].weight=4
+#mygraph2=newgraph(4,5)
+#mygraph2.edgelist[0].src=0
+#mygraph2.edgelist[0].dest=1
+#mygraph2.edgelist[0].weight=10
+#mygraph2.edgelist[1].src=0
+#mygraph2.edgelist[1].dest=2
+#mygraph2.edgelist[1].weight=6
+#mygraph2.edgelist[2].src=0
+#mygraph2.edgelist[2].dest=3
+#mygraph2.edgelist[2].weight=5
+#mygraph2.edgelist[3].src=1
+#mygraph2.edgelist[3].dest=3
+#mygraph2.edgelist[3].weight=15
+#mygraph2.edgelist[4].src=2
+#mygraph2.edgelist[4].dest=3
+#mygraph2.edgelist[4].weight=4
 
 #print mygraph2.edgelist[0]
 #print mygraph2.edgelist[1]
@@ -853,26 +1125,128 @@ g1[3][2]=float("inf")
 
 
 
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=addedgeend(mygraph,0,1)
+#mygraph=addedgeend(mygraph,1,2)
+#mygraph=addedgeend(mygraph,2,3)
+#mygraph=addedgeend(mygraph,3,0)
+#mygraph=addedgeend(mygraph,2,4)
+#mygraph=addedgeend(mygraph,4,2)
+
+#printgraph(mygraph)
+#print isSC(mygraph)
+
+
+#mygraph2=graph(4)
+#printgraph(mygraph2)
+#mygraph2=addedgeend(mygraph2,0,1)
+#mygraph2=addedgeend(mygraph2,1,2)
+#mygraph2=addedgeend(mygraph2,2,3)
+
+
+#printgraph(mygraph2)
+
+#print isSC(mygraph2)
+
+
+#mygraph2=graph(5)
+#printgraph(mygraph2)
+#mygraph2=adduedgeend(mygraph2,0,1)
+#mygraph2=adduedgeend(mygraph2,1,2)
+#mygraph2=adduedgeend(mygraph2,2,3)
+#mygraph2=adduedgeend(mygraph2,3,0)
+#mygraph2=adduedgeend(mygraph2,3,4)
+
+
+#printgraph(mygraph2)
+#print isConnected(mygraph2)
+#print iseuler(mygraph2)
+#printeuler(mygraph2)
+
+
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=addedgeend(mygraph,1,0)
+#mygraph=addedgeend(mygraph,0,2)
+#mygraph=addedgeend(mygraph,2,1)
+#mygraph=addedgeend(mygraph,0,3)
+#mygraph=addedgeend(mygraph,3,4)
+#printgraph(mygraph)
+#printSCC(mygraph)
+
+#g2=[]
+#for i in range(4):
+#    b=[]
+#    for j in range(4):
+#        b.append(0)
+#    g2.append(b)
+#g2[0][0]=1
+#g2[0][1]=1
+#g2[0][3]=1
+#g2[1][1]=1
+#g2[1][2]=1
+#g2[2][3]=1
+#g2[2][2]=1
+#g2[3][3]=1
+
+#ireachesj(g2)
+
+g3=[]
+for i in range(5):
+    b=[]
+    for j in range(5):
+        b.append(0)
+    g3.append(b)
+g3[0][0]=1
+g3[0][1]=1
+g3[1][1]=1
+g3[1][4]=1
+g3[2][0]=1
+g3[2][3]=1
+g3[2][4]=1
+g3[4][0]=1
+g3[4][2]=1
+g3[4][4]=1
+#print countisland(g3)
+
+g4=[]
+for i in range(4):
+    b=[]
+    for j in range(4):
+        b.append(0)
+    g4.append(b)
+g4[0][1]=1
+g4[0][2]=1
+g4[1][3]=1
+g4[1][3]=1
+g4[2][3]=1
+
+#print countpathsk(g4,0,3,2)
+
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=addedgeend(mygraph,1,0)
+#mygraph=addedgeend(mygraph,0,2)
+#mygraph=addedgeend(mygraph,2,1)
+#mygraph=addedgeend(mygraph,0,3)
+#mygraph=addedgeend(mygraph,3,4)
+#mygraph=addedgeend(mygraph,4,0)
+#printgraph(mygraph)
+#print iseulercycledirec(mygraph)
+
+
 mygraph=graph(5)
 printgraph(mygraph)
-mygraph=addedgeend(mygraph,0,1)
-mygraph=addedgeend(mygraph,1,2)
-mygraph=addedgeend(mygraph,2,3)
-mygraph=addedgeend(mygraph,3,0)
-mygraph=addedgeend(mygraph,2,4)
-mygraph=addedgeend(mygraph,4,2)
-
+mygraph=adduedgeend(mygraph,1,0)
+mygraph=adduedgeend(mygraph,0,2)
+mygraph=adduedgeend(mygraph,2,1)
+mygraph=adduedgeend(mygraph,0,3)
+mygraph=adduedgeend(mygraph,3,4)
+#mygraph4=adduedgeend(mygraph4,2,3)
+#mygraph4=adduedgeend(mygraph4,3,0)
+#mygraph4=adduedgeend(mygraph4,3,2)
+#mygraph4=adduedgeend(mygraph4,3,4)
+#mygraph4=adduedgeend(mygraph4,4,0)
 printgraph(mygraph)
-print isSC(mygraph)
-
-
-mygraph2=graph(4)
-printgraph(mygraph2)
-mygraph2=addedgeend(mygraph2,0,1)
-mygraph2=addedgeend(mygraph2,1,2)
-mygraph2=addedgeend(mygraph2,2,3)
-
-
-printgraph(mygraph2)
-
-print isSC(mygraph2)
+print isTree(mygraph)
