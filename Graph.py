@@ -1,4 +1,4 @@
-
+import random
 class adjnode(object):
     def __init__(self,dest,weight=0,next=None):
         self.dest=dest
@@ -508,6 +508,8 @@ def borgukal(g):
 	cheapest=[]
 	for i in range(V):
 		parent.append(-1)
+
+
 		cheapest.append(-1)
 	numTrees=V
 	while numTrees>1:
@@ -896,8 +898,106 @@ def isTree(mygraph):
 			return False
 	return True
 
+def karger(g):
+    parent=[]
+    for i in range(g.v):
+        parent.append(-1)
+    noOfVertices=g.v
+    while noOfVertices>2:
+        i=random.randint(0,g.e-1)
+        set1=find(parent,g.edgelist[i].src)
+        set2=find(parent,g.edgelist[i].dest)
+        if set1==set2:
+            continue
+        else:
+            print "Contracting "+str(g.edgelist[i].src)+"-----"+str(g.edgelist[i].dest)
+            union(parent,g.edgelist[i].src,g.edgelist[i].dest)
+            noOfVertices-=1
+    cutedges=0
+    for i in range(g.e):
 
+        set1=find(parent,g.edgelist[i].src)
+        set2=find(parent,g.edgelist[i].dest)
+        if not set1==set2:
+            cutedges+=1
+    return cutedges
 
+def vertexcolor(g):
+    used=[]
+    assigned=[]
+    for i in range(g.v):
+        used.append(False)
+        assigned.append(-1)
+    assigned[0]=0
+    for u in range(1,g.v):
+        curr=g.array[u].head
+        while curr:
+            if not assigned[curr.dest]==-1:
+                used[assigned[curr.dest]]=True
+            curr=curr.next
+        for i in range(g.v):
+            if used[i]==False:
+                break
+        assigned[u]=i
+        curr=g.array[u].head
+        while curr:
+            if not assigned[curr.dest]==-1:
+                used[assigned[curr.dest]]=False
+            curr=curr.next
+    for i in range(g.v):
+        print i,assigned[i]
+def issafe(v,g,path,pos):
+    if not g[path[pos-1]][v]:
+        return False
+    for i in range(pos):
+        if path[i]==v:
+            return False
+    return True
+
+def hamrec(g,path,pos):
+    if pos==len(g):
+        if g[path[pos-1]][path[0]]:
+            return True
+        else:
+            return False
+    for i in range(len(g)):
+        if issafe(i,g,path,pos):
+            path[pos]=i
+            if hamrec(g,path,pos+1):
+                return True
+            
+            path[pos]=-1
+    return False
+
+def hamcycle(g):
+    v=len(g)
+    path=[]
+    for i in range(v):
+        path.append(-1)
+    path[0]=0
+    if not hamrec(g,path,1):
+        print "NO solution exist"
+    else:
+        path.append(0)
+        print path
+        
+def vertexcover(g):
+    visited=[]
+    for i in range(g.v):
+        visited.append(False)
+    for u in range(g.v):
+        if not visited[u]:
+            curr=g.array[u].head
+            while curr:
+                v=curr.dest
+                if not visited[v]:
+                    visited[u]=True
+                    visited[v]=True
+                    break
+                curr=curr.next
+    for i in range(g.v):
+        if visited[i]:
+            print i,
 #mygraph=graph(5)
 #printgraph(mygraph)
 #mygraph=addedgeend(mygraph,0,1)
@@ -1236,17 +1336,81 @@ g4[2][3]=1
 #print iseulercycledirec(mygraph)
 
 
-mygraph=graph(5)
-printgraph(mygraph)
-mygraph=adduedgeend(mygraph,1,0)
-mygraph=adduedgeend(mygraph,0,2)
-mygraph=adduedgeend(mygraph,2,1)
-mygraph=adduedgeend(mygraph,0,3)
-mygraph=adduedgeend(mygraph,3,4)
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=adduedgeend(mygraph,1,0)
+#mygraph=adduedgeend(mygraph,0,2)
+#mygraph=adduedgeend(mygraph,2,1)
+#mygraph=adduedgeend(mygraph,0,3)
+#mygraph=adduedgeend(mygraph,3,4)
 #mygraph4=adduedgeend(mygraph4,2,3)
 #mygraph4=adduedgeend(mygraph4,3,0)
 #mygraph4=adduedgeend(mygraph4,3,2)
 #mygraph4=adduedgeend(mygraph4,3,4)
 #mygraph4=adduedgeend(mygraph4,4,0)
-printgraph(mygraph)
-print isTree(mygraph)
+#printgraph(mygraph)
+#print isTree(mygraph)
+
+#mygraph2=newgraph(4,5)
+#mygraph2.edgelist[0].src=0
+#mygraph2.edgelist[0].dest=1
+#mygraph2.edgelist[0].weight=10
+#mygraph2.edgelist[1].src=0
+#mygraph2.edgelist[1].dest=2
+#mygraph2.edgelist[1].weight=6
+#mygraph2.edgelist[2].src=0
+#mygraph2.edgelist[2].dest=3
+#mygraph2.edgelist[2].weight=5
+#mygraph2.edgelist[3].src=1
+#mygraph2.edgelist[3].dest=3
+#mygraph2.edgelist[3].weight=15
+#mygraph2.edgelist[4].src=2
+#mygraph2.edgelist[4].dest=3
+#mygraph2.edgelist[4].weight=4
+#print karger(mygraph2)
+
+mygraph4=graph(5)
+#printgraph(mygraph4)
+mygraph4=adduedgeend(mygraph4,0,1,5)
+mygraph4=adduedgeend(mygraph4,0,2,3)
+mygraph4=adduedgeend(mygraph4,1,2,6)
+mygraph4=adduedgeend(mygraph4,1,3,2)
+mygraph4=adduedgeend(mygraph4,2,3,4)
+mygraph4=adduedgeend(mygraph4,3,4,2)
+
+#printgraph(mygraph4)
+#vertexcolor(mygraph4)
+
+g5=[]
+for i in range(5):
+    b=[]
+    for j in range(5):
+        b.append(0)
+    g5.append(b)
+g5[0][1]=1
+g5[0][3]=1
+g5[1][0]=1
+g5[1][2]=1
+g5[1][3]=1
+g5[1][4]=1
+g5[2][1]=1
+g5[2][4]=1
+g5[3][0]=1
+g5[3][1]=1
+g5[3][4]=1
+g5[4][1]=1
+g5[4][2]=1
+g5[4][3]=1
+#hamcycle(g5)
+
+mygraph7=graph(7)
+printgraph(mygraph7)
+mygraph7=adduedgeend(mygraph7,0,1,5)
+mygraph7=adduedgeend(mygraph7,0,2,3)
+mygraph7=adduedgeend(mygraph7,1,3,6)
+mygraph7=adduedgeend(mygraph7,3,4,2)
+mygraph7=adduedgeend(mygraph7,4,5,4)
+mygraph7=adduedgeend(mygraph7,5,6,2)
+
+printgraph(mygraph7)
+vertexcover(mygraph7)
