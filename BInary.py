@@ -2,7 +2,9 @@ class Node(object):
     def __init__(self, data):
         self.data=data
         self.left=None
-        self.right=None    
+        self.right=None
+        self.nextright=None #for connectig nodes at same level 
+        self.succ=None
     
     def __str__(self):
         return str(self.data)
@@ -391,8 +393,87 @@ def issubtree(root1,root2):
         return True
     return issubtree(root1.left,root2) or issubtree(root1.right,root2)
 
- def connect(root):
-    pass
+def connect(p):
+	if not p:
+		return
+	if p.left:
+		p.left.nextright=p.right
+	if p.right:
+		if p.nextright:
+			p.right.nextright=p.nextright.left
+	connect(p.left)
+	connect(p.right)
+
+
+def populateinordersucc(root):
+	if root:
+		populateinordersucc(root.right)
+		root.succ=populateinordersucc.inordsucc
+		populateinordersucc.inordsucc=root
+		populateinordersucc(root.left)
+populateinordersucc.inordsucc=None
+
+def verticalsum(root):
+	if not root:
+		return
+	mydict={}
+	verticalsumutil(root,0,mydict)
+	print mydict
+def verticalsumutil(root,hd,mydict):
+	if not root:
+		return
+	verticalsumutil(root.left,hd-1,mydict)
+	prevsum=0
+	if mydict.has_key(hd):
+		prevsum=mydict[hd]
+	mydict[hd]=prevsum+root.data
+	verticalsumutil(root.right,hd+1,mydict)
+def gettargetleaf(root,maxsum,currsum,target):
+	if not root:
+		return maxsum,target
+	currsum+=root.data
+	if root.left==None and root.right==None:
+		if currsum>maxsum:
+			maxsum=currsum
+			target=root
+	maxsum,target=gettargetleaf(root.left,maxsum,currsum,target)
+	maxsum,target=gettargetleaf(root.right,maxsum,currsum,target)
+	return maxsum,target
+def printmaxsumpath(root,target):
+	if root==None:
+		return False
+	if root==target or printmaxsumpath(root.left,target) or printmaxsumpath(root.right,target):
+		print root.data
+		return True
+	return False
+
+def maxsumpath(root):
+	if root==None:
+		return 0
+	target=None
+	maxsum=-float("inf")
+	maxsum,target=gettargetleaf(root,maxsum,0,target)
+	print maxsum,target
+	printmaxsumpath(root,target)
+	return maxsum
+def arraytobinary(array,start,end):
+	if start>end:
+		return None
+	maxi=-float("inf")
+	idx=-1
+	for i in range(start,end+1):
+		if array[i]>maxi:
+			maxi=array[i]
+			idx=i
+	root= Node(array[idx])
+	if start==end:
+		return root
+		
+	root.left=arraytobinary(array,start,idx-1)
+	root.right=arraytobinary(array,idx+1,end)
+	return root
+
+
 mytree=Tree()
 mytree.root=Node(1)
 mytree.root.left=Node(2)
@@ -514,3 +595,23 @@ mytree6.root.right=Node(5)
 #print issubtree(mytree2.root,mytree6.root)
 
 #connect(mytree.root)
+#print mytree.root,mytree.root.nextright
+#print mytree.root.left,mytree.root.left.nextright
+#print mytree.root.right,mytree.root.right.nextright
+#print mytree.root.left.left,mytree.root.left.left.nextright
+#print mytree.root.left.right,mytree.root.left.right.nextrigh0
+
+#populateinordersucc(mytree.root)
+#print mytree.root,mytree.root.succ
+#print mytree.root.left,mytree.root.left.succ
+#print mytree.root.right,mytree.root.right.succ
+#print mytree.root.left.left,mytree.root.left.left.succ
+#print mytree.root.left.right,mytree.root.left.right.succ
+
+#verticalsum(mytree.root)
+
+#maxsumpath(mytree.root)
+
+#mytree.root=arraytobinary([5,20,35,10,15,30],0,5)
+#print mytree.root,mytree.root.left,mytree.root.left.left
+#print mytree.root.right,mytree.root.right.left,mytree.root.right.left.left

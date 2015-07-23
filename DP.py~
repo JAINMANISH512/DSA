@@ -3,7 +3,7 @@ def fibrec(n):
 		return n
 	return fibrec(n-1)+fibrec(n-2)
 
-#print fibrec(40)
+print fibrec(40)
 
 fiblookup=[]
 for i in range(100):

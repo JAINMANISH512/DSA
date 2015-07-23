@@ -36,7 +36,7 @@ class graph(object):
         return str(self.array)
 
 class edge(object):
-    def __init__(self,src,dest,weight):
+    def __init__(self,src,dest,weight=0):
         self.src=src
         self.dest=dest
         self.weight=weight
@@ -160,7 +160,8 @@ def bfs(g,src):
             if visited[curr.dest]==False:
                 myqueue.enq(curr.dest)
                 visited[curr.dest]=True
-            curr=curr.next   
+            curr=curr.next  
+
 def dfs(g):
     visited=[]
     for i in range(g.v):
@@ -998,6 +999,306 @@ def vertexcover(g):
     for i in range(g.v):
         if visited[i]:
             print i,
+time=0
+def aputil(g,u,visited,disc,low,parent,ap):
+    global time
+    children=0
+    visited[u]=True
+    time+=1
+    low[u]=time
+    disc[u]=time
+    #print u,time
+    curr=g.array[u].head
+    while curr:
+        v=curr.dest
+        if not visited[v]:
+            children+=1
+            parent[v]=u
+            aputil(g,v,visited,disc,low,parent,ap)
+            low[u]=min(low[u],low[v])
+            if parent[u]==None and children>1:
+                ap[u]=True
+            if not (parent[u]==None) and disc[u]<=low[v]:
+                
+                ap[u]=True
+        elif not (v==parent[u]):
+            low[u]=min(low[u],disc[v])
+
+
+        curr=curr.next
+
+
+def ap(g):
+    visited=[]
+    disc=[]
+    low=[]
+    parent=[]
+    ap=[]
+    for i in range(g.v):
+        visited.append(False)
+        disc.append(None)
+        low.append(None)
+        parent.append(None)
+        ap.append(False)
+    for i in range(g.v):
+        if not visited[i]:
+            aputil(g,i,visited,disc,low,parent,ap)
+    for i in range(g.v):
+        if ap[i]:
+            print i
+    ap1=ap
+    return visited,ap1
+
+def biconnected(g):
+    visited,ap1=ap(g)
+    for i in range(g.v):
+        if (not visited[i]) or ap1[i]:
+            print "Not Biconnected"
+            return
+    print "Biconnected"
+    
+def bridgeutil(g,u,visited,disc,low,parent):
+    global time
+    children=0
+    visited[u]=True
+    time+=1
+    low[u]=time
+    disc[u]=time
+    #print u,time
+    curr=g.array[u].head
+    while curr:
+        v=curr.dest
+        if not visited[v]:
+            children+=1
+            parent[v]=u
+            bridgeutil(g,v,visited,disc,low,parent)
+            low[u]=min(low[u],low[v])
+            if disc[u]<low[v]:
+                print str(u)+"---"+str(v)
+        elif not (v==parent[u]):
+            low[u]=min(low[u],disc[v])
+
+
+        curr=curr.next
+
+
+def bridge(g):
+    visited=[]
+    disc=[]
+    low=[]
+    parent=[]
+    ap=[]
+    for i in range(g.v):
+        visited.append(False)
+        disc.append(None)
+        low.append(None)
+        parent.append(None)
+        ap.append(False)
+    for i in range(g.v):
+        if not visited[i]:
+            bridgeutil(g,i,visited,disc,low,parent)
+count=0
+def BCCutil(g,u,disc,low,parent,stack):
+    global time,count
+    children=0
+    time+=1
+    low[u]=time
+    disc[u]=time
+    #print u,time
+    curr=g.array[u].head
+    while curr:
+        v=curr.dest
+        if disc[v]==-1:
+            children+=1
+            parent[v]=u
+            new=edge(u,v)
+            stack.append(new)
+            BCCutil(g,v,disc,low,parent,stack)
+            low[u]=min(low[u],low[v])
+
+            if (disc[u]==1 and children>1) or ((disc[u]>1) and disc[u]<=low[v]):
+                
+                while (not (stack[-1].dest==v)) or (not (stack[-1].src==u)):
+                    
+                    print str(stack[-1].src)+"----"+str(stack[-1].dest)
+                    stack.pop()
+                a=stack.pop()
+                print "this is u-v"
+                print str(a.src)+"----"+str(a.dest)
+                count+=1
+
+        
+        elif not (v==parent[u]) and disc[v]<low[u]:
+            low[u]=min(low[u],disc[v])
+            stack.append(edge(u,v))
+
+
+        curr=curr.next
+
+
+def BCC(g):
+    global count
+    
+    disc=[]
+    low=[]
+    parent=[]
+    stack=[]
+    for i in range(g.v):
+        
+        disc.append(-1)
+        low.append(None)
+        parent.append(None)
+    
+    for i in range(g.v):
+        if disc[i]==-1:
+            BCCutil(g,i,disc,low,parent,stack)
+            print "\n"
+            j=0
+            #print  "remaing"
+            while len(stack):
+                j=1
+                a=stack.pop()
+                print str(a.src)+"----"+str(a.dest)
+            if j==1:
+                count+=1
+                print "\n"
+    
+    print "Bo. of BCC are : "+str(count)
+    
+def bfsst(g,src,dest,parent):
+    visited=[]
+    for i in range(len(g)):
+        visited.append(False)
+    visited[src]=True
+    myqueue=queue()
+    myqueue.enq(src)
+    parent[src]=-1
+    while myqueue.isemp()==False:
+
+        u=myqueue.deq()
+        for v in range(len(g)):
+            if visited[v]==False and g[u][v]>0:
+                myqueue.enq(v)
+                visited[v]=True
+                parent[v]=u
+    return visited[dest]
+     
+def maxflow(g,s,t):
+    rg=[]
+    for i in range(len(g)):
+        b=[]
+        for j in range(len(g)):
+            b.append(g[i][j])
+        rg.append(b)
+    parent=[]
+    for i in range(len(g)):
+        parent.append(-1)
+    maxflow=0
+    while bfsst(rg,s,t,parent):
+        pathflow=9999
+        v=t
+        while not v==s:
+            u=parent[v]
+            pathflow=min(pathflow,rg[u][v])
+            v=parent[v]
+        
+        v=t
+        while not v==s:
+            u=parent[v]
+            rg[u][v]-=pathflow
+            rg[v][u]+=pathflow
+            v=parent[v]
+        maxflow+=pathflow
+    return maxflow
+
+def disjointpath(g,s,t):
+    return maxflow(g,s,t)
+def dfsmatrixsrc(g,s,visited):
+    visited[s]=True
+    for i in range(len(g)):
+        if g[s][i] and (not visited[i]):
+            dfsmatrixsrc(g,i,visited)
+def mincut(g,s,t):
+    rg=[]
+    for i in range(len(g)):
+        b=[]
+        for j in range(len(g)):
+            b.append(g[i][j])
+        rg.append(b)
+    parent=[]
+    for i in range(len(g)):
+        parent.append(-1)
+    maxflow=0
+    while bfsst(rg,s,t,parent):
+        pathflow=9999
+        v=t
+        while not v==s:
+            u=parent[v]
+            pathflow=min(pathflow,rg[u][v])
+            v=parent[v]
+        
+        v=t
+        while not v==s:
+            u=parent[v]
+            rg[u][v]-=pathflow
+            rg[v][u]+=pathflow
+            v=parent[v]
+    visited=[]
+    for i in range(len(g)):
+        visited.append(False)
+
+    dfsmatrixsrc(rg,s,visited)
+    for i in range(len(g)):
+        for j in range(len(g)):
+            if visited[i] and (not visited[j]) and g[i][j]:
+                print str(i)+"----"+str(j)
+
+def bpm(g,u,seen,match):
+    M=len(g)
+    N=len(g[0])
+    for v in range(N):
+        if g[u][v] and (not seen[v]):
+            seen[v]=True
+            if match[v]<0 or bpm(g,match[v],seen,match):
+                match[v]=u
+                return True
+    return False
+
+def maxbpm(g):
+    M=len(g)
+    N=len(g[0])
+    match=[]
+    for i in range(N):
+        match.append(-1)
+    result=0
+    for u in range(M):
+        seen=[]
+        for i in range(N):
+            seen.append(False)
+        if bpm(g,u,seen,match):
+            result+=1
+    
+    return result
+def channelassign(g):
+    M=len(g)
+    N=len(g[0])
+    print M,N
+    match=[]
+    for i in range(N):
+        match.append(-1)
+    result=0
+    for u in range(M):
+        seen=[]
+        for i in range(N):
+            seen.append(False)
+        if bpm(g,u,seen,match):
+            result+=1
+    for x in range(N):
+        if not match[x]==-1:
+            print "T"+str(match[x]+1)+"->R"+str(x+1)
+    return result
+
+
 #mygraph=graph(5)
 #printgraph(mygraph)
 #mygraph=addedgeend(mygraph,0,1)
@@ -1412,5 +1713,99 @@ mygraph7=adduedgeend(mygraph7,3,4,2)
 mygraph7=adduedgeend(mygraph7,4,5,4)
 mygraph7=adduedgeend(mygraph7,5,6,2)
 
-printgraph(mygraph7)
-vertexcover(mygraph7)
+#printgraph(mygraph7)
+#vertexcover(mygraph7)
+
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=adduedgeend(mygraph,1,0)
+#mygraph=adduedgeend(mygraph,0,2)
+#mygraph=adduedgeend(mygraph,2,1)
+#mygraph=adduedgeend(mygraph,0,3)
+#mygraph=adduedgeend(mygraph,3,4)
+#printgraph(mygraph)
+#ap(mygraph)
+
+
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=adduedgeend(mygraph,1,0)
+#mygraph=adduedgeend(mygraph,0,2)
+#mygraph=adduedgeend(mygraph,2,1)
+#mygraph=adduedgeend(mygraph,0,3)
+#mygraph=adduedgeend(mygraph,3,4)
+
+#mygraph=adduedgeend(mygraph,0,1)
+#mygraph=adduedgeend(mygraph,1,2)
+#mygraph=adduedgeend(mygraph,2,0)
+
+#printgraph(mygraph)
+#biconnected(mygraph)
+
+
+#mygraph=graph(5)
+#printgraph(mygraph)
+#mygraph=adduedgeend(mygraph,1,0)
+#mygraph=adduedgeend(mygraph,0,2)
+#mygraph=adduedgeend(mygraph,2,1)
+#mygraph=adduedgeend(mygraph,0,3)
+#mygraph=adduedgeend(mygraph,3,4)
+#printgraph(mygraph)
+#bridge(mygraph)
+
+
+mygraph=graph(12)
+printgraph(mygraph)
+mygraph=adduedgeend(mygraph,0,1)
+mygraph=adduedgeend(mygraph,1,2)
+mygraph=adduedgeend(mygraph,1,3)
+mygraph=adduedgeend(mygraph,2,3)
+mygraph=adduedgeend(mygraph,2,4)
+mygraph=adduedgeend(mygraph,3,4)
+mygraph=adduedgeend(mygraph,1,5)
+mygraph=adduedgeend(mygraph,0,6)
+mygraph=adduedgeend(mygraph,5,6)
+mygraph=adduedgeend(mygraph,5,7)
+mygraph=adduedgeend(mygraph,5,8)
+mygraph=adduedgeend(mygraph,7,8)
+mygraph=adduedgeend(mygraph,8,9)
+mygraph=adduedgeend(mygraph,10,11)
+#printgraph(mygraph)
+#BCC(mygraph)
+
+g7=[]
+for i in range(6):
+    b=[]
+    for j in range(6):
+        b.append(0)
+    g7.append(b)
+g7[0][1]=16
+g7[0][2]=13
+g7[1][2]=10
+g7[1][3]=12
+g7[2][1]=4
+g7[2][4]=14
+g7[3][2]=9
+g7[3][5]=20
+g7[4][3]=7
+g7[4][5]=4
+
+g7[0][1]=1
+g7[0][2]=1
+g7[1][2]=1
+g7[1][3]=1
+g7[2][1]=1
+g7[2][4]=1
+g7[3][2]=1
+g7[3][5]=1
+g7[4][3]=1
+g7[4][5]=1
+
+#print maxflow(g7,0,5)
+
+#print disjointpath(g7,0,5)
+
+#mincut(g7,0,5)
+
+#print maxbpm(g7)
+print channelassign(g7)
