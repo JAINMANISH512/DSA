@@ -11,12 +11,46 @@ class BST(object):
 	def __init__(self,root=None):
 		self.root=root
 
+class Nodell(object):
+	def __init__(self,data):
+		self.data=data
+		self.next=None
+
+	def __str__(self):
+		return str(self.data)
+
+class linkedlist(object):
+	def __init__(self,head=None):
+		self.head=head
+
+	def __str__(self):
+		curr=self.head
+		arr=[]
+		while curr:
+			arr.append(curr.data)
+			curr=curr.next
+		return str(arr)
+
+def insertfront(head,data):
+	new=Nodell(data)
+	new.next=head
+	head=new
+	return head
+
 def inord(root):
 	if root==None:
 		return
 	inord(root.left)
 	print root.data
 	inord(root.right)
+
+def preord(root):
+	if root==None:
+		return
+	print root.data
+	preord(root.left)
+
+	preord(root.right)
 
 def search(root,key):
 	if root==None:
@@ -334,6 +368,144 @@ def ceiling(root,ip):
 		return leftceil
 	else:
 		return root.data
+
+def sortedlltobstutil(head,n):
+	if n<=0:
+		return head,None
+	head,left=sortedlltobstutil(head,n/2)
+	root=Node(head.data)
+	root.left=left
+	head=head.next
+	head,root.right=sortedlltobstutil(head,n-(n/2)-1)
+	return head,root
+def sortedlltobst(head):
+	curr=head
+	count=0
+	while curr:
+		count+=1
+		curr=curr.next
+	head,root=sortedlltobstutil(head,count)
+	return root
+
+def ispairpresent(root,target):
+	stack1=[]
+	stack2=[]
+	done1=False
+	done2=False
+	curr1=curr2=root
+	while True:
+		while not done1:
+			if curr1:
+				stack1.append(curr1)
+				curr1=curr1.left
+			else:
+				if len(stack1)==0:
+					done1=True
+				else:
+					curr1=stack1.pop()
+					val1=curr1.data
+					curr1=curr1.right
+					done1=True
+		while not done2:
+			if curr2:
+				stack2.append(curr2)
+				curr2=curr2.right
+			else:
+				if len(stack2)==0:
+					done2=True
+				else:
+					curr2=stack2.pop()
+					val2=curr2.data
+					curr2=curr2.left
+					done2=True
+		#print val1,val2
+		if not (val1==val2) and val1+val2==target:
+			print val1,val2
+			return True
+		elif val1+val2<target:
+			done1=False
+		elif val1+val2>target:
+			done2=False
+		if val1>=val2:
+			return False
+def storeorcopyinorder(root,inorder,idx,flag):#flag=0 store else copy
+	if not root:
+		return idx
+	idx=storeorcopyinorder(root.left,inorder,idx,flag)
+	if not flag:
+		inorder[idx]=root.data
+	else:
+		root.data=inorder[idx]
+	idx+=1
+	idx=storeorcopyinorder(root.right,inorder,idx,flag)
+	return idx
+
+def binarytreetobst(root):
+	if not root:
+		return
+	n=size(root)
+	arr=[]
+	for i in range(n):
+		arr.append(None)
+	idx=storeorcopyinorder(root,arr,0,0)
+	print arr
+	arr.sort()
+	print arr
+	idx=storeorcopyinorder(root,arr,0,1)
+	del arr
+
+def bsttogreatersumtree(root,sumx):
+	if root==None:
+		return sumx
+	sumx=bsttogreatersumtree(root.right,sumx)
+	sumx=sumx+root.data
+	root.data=sumx-root.data
+	sumx=bsttogreatersumtree(root.left,sumx)
+
+	return sumx
+def mergearrays(arr1,arr2):
+	m=len(arr1)
+	n=len(arr2)
+	res=[]
+	i=0
+	j=0
+	while i<m and j<n:
+		if arr1[i]<=arr2[j]:
+			res.append(arr1[i])
+			i+=1
+		else:
+			res.append(arr2[j])
+			j+=1
+	while i<m:
+		res.append(arr1[i])
+		i+=1
+	
+	while j<m:
+		res.append(arr2[j])
+		j+=1
+	return res
+def mergetwotrees(root1,root2):
+	if root1==None:
+		return root2
+	if root2==None:
+		return root1
+	m=size(root1)
+	n=size(root2)
+	arr1=[]
+	arr2=[]
+	arr=[]
+	for i in range(m):
+		arr1.append(None)
+	idx=storeorcopyinorder(root1,arr1,0,0)
+	for i in range(n):
+		arr2.append(None)
+	idx=storeorcopyinorder(root2,arr2,0,0)
+	mergedarray=mergearrays(arr1,arr2)
+	#print mergedarray
+	root=sortarrtobst(mergedarray,0,len(mergedarray)-1)
+	return root
+
+
 mybst=BST()
 mybst.root=Node(20)
 mybst.root.left=Node(8)
@@ -342,6 +514,8 @@ mybst.root.left.left=Node(4)
 mybst.root.left.right=Node(12)
 mybst.root.right.left=Node(21)
 mybst.root.right.right=Node(26)
+
+
 
 #mybst.root=insert(mybst.root,7)
 #mybst.root=insert(mybst.root,5)
@@ -455,3 +629,40 @@ mybst.root.right.right=Node(26)
 
 #for i in range(30):
 #	print i,ceiling(mybst.root,i)
+
+#mylist=linkedlist()
+#mylist.head=insertfront(mylist.head,7)
+#mylist.head=insertfront(mylist.head,6)
+#mylist.head=insertfront(mylist.head,5)
+#mylist.head=insertfront(mylist.head,4)
+#mylist.head=insertfront(mylist.head,3)
+#mylist.head=insertfront(mylist.head,2)
+#mylist.head=insertfront(mylist.head,1)
+#print mylist
+#mybst.root=sortedlltobst(mylist.head)
+#preord(mybst.root)
+
+#inord(mybst.root)
+#print ispairpresent(mybst.root,14)
+
+#mybst.root=Node(21)
+#mybst.root.left=Node(1)
+#mybst.root.right=Node(2)
+#mybst.root.left.left=Node(3)
+#mybst.root.left.right=Node(72)
+#mybst.root.right.left=Node(81)
+#mybst.root.right.right=Node(76)
+#inord(mybst.root)
+#binarytreetobst(mybst.root)
+#inord(mybst.root)
+
+#inord(mybst.root)
+#bsttogreatersumtree(mybst.root,0)
+#inord(mybst.root)
+
+#How to handle dupicates : modify tree struct n insert n del funcs
+
+#inord(mybst.root)
+#res=BST()
+#res.root=mergetwotrees(mybst.root,mybst.root)
+#inord(res.root)
