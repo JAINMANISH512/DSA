@@ -473,6 +473,26 @@ def arraytobinary(array,start,end):
 	root.right=arraytobinary(array,idx+1,end)
 	return root
 
+def iscomplete(root):
+    myqueue=[]
+    myqueue.append(root)
+    flag=False
+    while len(myqueue):
+        temp=myqueue[0]
+        myqueue=myqueue[1:]
+        if temp.left:
+            if flag:
+                return False
+            myqueue.append(temp.left)
+        else:
+            flag=True
+        if temp.right:
+            if flag:
+                return False
+            myqueue.append(temp.right)
+        else:
+            flag=True
+    return True
 
 mytree=Tree()
 mytree.root=Node(1)
@@ -615,3 +635,39 @@ mytree6.root.right=Node(5)
 #mytree.root=arraytobinary([5,20,35,10,15,30],0,5)
 #print mytree.root,mytree.root.left,mytree.root.left.left
 #print mytree.root.right,mytree.root.right.left,mytree.root.right.left.left
+
+
+#print iscomplete(mytree3.root)
+
+def printboundaryleft(root):
+    if root:
+        if root.left:
+            print root
+            printboundaryleft(root.left)
+        elif root.right:
+            print root
+            printboundaryleft(root.right)
+def printboundaryright(root):
+    if root:
+        if root.right:
+            print root
+            printboundaryleft(root.right)
+        elif root.left:
+            print root
+            printboundaryleft(root.left)
+def printleaves(root):
+    if root:
+        printleaves(root.left)
+        if not root.left and not root.right:
+            print root
+        printleaves(root.right)
+def printboundary(root):
+    if root:
+        print root
+        printboundaryleft(root.left)
+        printleaves(root.left)
+        printleaves(root.right)
+        printboundaryright(root.right)
+
+
+#printboundary(mytree.root)
