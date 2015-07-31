@@ -366,7 +366,7 @@ def snakeladder(move,N):
                     else:
                         adj=move[i]
                     dist[adj]=dist[s]+1
-                    print s,adj,myqueue
+                    #print s,adj,myqueue
                     myqueue.enq(adj)
 
 
